@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SENTINEL.API — API Security & Governance Command Center</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+              950: '#0f172a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    /* ===================================================================== */
+    /* HUMANIZED TRANSLUCENT GLASS & MOUNTAIN WALLPAPER AESTHETIC            */
+    /* (Meticulously crafted after G.TAKE Pinterest GUI design system)       */
+    /* ===================================================================== */
+
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      overflow-x: hidden;
+      background-color: #070a12;
+      background-image: 
+        radial-gradient(circle at 50% 100%, rgba(249, 115, 22, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.18) 0%, transparent 45%),
+        url('/assets/mountain-bg.jpg'),
+        url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2560&q=85');
+      background-size: cover;
+      background-position: center bottom;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Ambient Vignette Overlay */
+    .viewport-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 45%, rgba(6, 10, 20, 0.42) 0%, rgba(4, 7, 14, 0.84) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Floating Frosted Glass Window Container */
+    .dashboard-window {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 1420px;
+      margin: 20px auto;
+      border-radius: 36px;
+      background: rgba(11, 17, 30, 0.72);
+      backdrop-filter: blur(32px) saturate(190%);
+      -webkit-backdrop-filter: blur(32px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-top: 1px solid rgba(255, 255, 255, 0.24);
+      border-left: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 
+        0 40px 100px -20px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(255, 255, 255, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 0 60px rgba(37, 99, 235, 0.08);
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-window {
+        margin: 8px;
+        border-radius: 24px;
+      }
+    }
+
+    /* Bento Cards */
+    .bento-card {
+      background: rgba(16, 23, 38, 0.58);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 24px;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .bento-card:hover {
+      background: rgba(22, 33, 54, 0.72);
+      border-color: rgba(96, 165, 250, 0.35);
+      border-top-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.7), 0 0 30px rgba(59, 130, 246, 0.15);
+    }
+
+    /* Hero Active Bento Card (Matching "Design System" royal blue gradient in reference) */
+    .bento-hero-active {
+      background: linear-gradient(135deg, rgba(30, 64, 175, 0.72) 0%, rgba(15, 28, 60, 0.86) 60%, rgba(10, 18, 38, 0.92) 100%);
+      border: 1px solid rgba(96, 165, 250, 0.5);
+      border-top: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 26px;
+      box-shadow: 
+        0 24px 60px -12px rgba(37, 99, 235, 0.45),
+        0 0 30px rgba(37, 99, 235, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bento-hero-active:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 28px 70px -10px rgba(37, 99, 235, 0.55),
+        0 0 40px rgba(59, 130, 246, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    }
+
+    /* Diagonal Candy Striping (Direct match to reference %70 bar) */
+    .striped-candy-bar {
+      background-image: repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.24),
+        rgba(255, 255, 255, 0.24) 8px,
+        transparent 8px,
+        transparent 16px
+      );
+      background-size: 200% 100%;
+      animation: stripeSlide 20s linear infinite;
+    }
+
+    @keyframes stripeSlide {
+      from { background-position: 0 0; }
+      to { background-position: 200% 0; }
+    }
+
+    /* Sidebar Navigation Links */
+    .nav-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 16px;
+      border-radius: 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #94a3b8;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .nav-pill:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateX(2px);
+    }
+
+    /* Active Glowing 3D Nav State (Matching Dashboard 3D orb in reference) */
+    .nav-pill-active {
+      color: #ffffff;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.28) 0%, rgba(37, 99, 235, 0.15) 100%);
+      border: 1px solid rgba(59, 130, 246, 0.45);
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 24px -4px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      font-weight: 600;
+    }
+
+    /* Glowing Action Button (Like "New task" pill in reference) */
+    .btn-tactile-glow {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: #ffffff;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 25px -4px rgba(37, 99, 235, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+    .btn-tactile-glow:hover {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      box-shadow: 0 12px 32px rgba(37, 99, 235, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+    .btn-tactile-glow:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.5);
+    }
+
+    /* Smooth Fluid View Cross-Fade */
+    .view-container {
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    /* Custom Webkit Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(10, 15, 26, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(59, 130, 246, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(59, 130, 246, 0.65);
+    }
+  </style>
+</head>
+
+<body class="selection:bg-blue-500 selection:text-white p-2 md:p-6 lg:p-8">
+
+  <!-- Atmospheric Cosmic Vignette -->
+  <div class="viewport-overlay"></div>
+
+  <!-- VUE 3 APPLICATION MOUNT -->
+  <div id="app" class="w-full relative z-10">
+
+    <!-- MAIN FLOATING FROSTED GLASS WINDOW -->
+    <main class="dashboard-window grid grid-cols-1 lg:grid-cols-12 min-h-[880px]">
+      
+      <!-- ============================================================= -->
+      <!-- LEFT SIDEBAR (Direct match to G.TAKE navigation in reference) -->
+      <!-- ============================================================= -->
+      <aside class="lg:col-span-2 p-6 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/10 bg-slate-950/40">
+        
+        <div class="space-y-8">
+          <!-- Logo & Brand Identifier (Matching "G.TAKE" in reference) -->
+          <div class="flex items-center gap-3.5 cursor-pointer" @click="setView('dashboard')">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30 border border-white/20">
+              <i class="fa-solid fa-shield-halved text-white text-base"></i>
+            </div>
+            <div>
+              <div class="font-extrabold text-white text-base tracking-wide leading-tight font-sans">
+                G.TAKE<span class="text-blue-400 font-normal">.SEC</span>
+              </div>
+              <div class="text-[11px] text-slate-400 font-normal">
+                Governance Hub
+              </div>
+            </div>
+          </div>
+
+          <!-- Primary Navigation Links -->
+          <nav class="space-y-2">
+            <!-- 1. Dashboard (With 3D Glowing Orb Icon) -->
+            <div 
+              @click="setView('dashboard')"
+              class="nav-pill"
+              :class="activeView === 'dashboard' ? 'nav-pill-active' : ''">
+              <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                   :class="activeView === 'dashboard' ? 'bg-blue-500 text-white shadow-md shadow-blue-500/50' : 'bg-white/5 text-slate-400'">
+                <i class="fa-solid fa-house text-xs"></i>
+              </div>
+              <span class="font-medium">Dashboard</span>
+            </div>
+
+            <!-- 2. API Catalog -->
+            <div 
+              @click="setView('catalog')"
+              class="nav-pill justify-between"
+              :class="activeView === 'catalog' ? 'nav-pill-active' : ''">
+              <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                     :class="activeView === 'catalog' ? 'bg-blue-500 text-white shadow-md' : 'bg-white/5 text-slate-400'">
+                  <i class="fa-solid fa-list-check text-xs"></i>
+                </div>
+                <span>API Catalog</span>
+              </div>
+              <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-white/10 text-blue-300">
+                {{ inventory.length }}
+              </span>
+            </div>
+
+            <!-- 3. Abuse Alerts -->
+            <div 
+              @click="setView('alerts')"
+              class="nav-pill justify-between"
+              :class="activeView === 'alerts' ? 'nav-pill-active' : ''">
+              <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                     :class="activeView === 'alerts' ? 'bg-amber-500 text-white shadow-md' : 'bg-white/5 text-slate-400'">
+                  <i class="fa-solid fa-triangle-exclamation text-xs text-amber-300"></i>
+                </div>
+                <span>Abuse Alerts</span>
+              </div>
+              <span v-if="alerts.length > 0" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-rose-500/80 text-white animate-pulse">
+                {{ alerts.length }}
+              </span>
+            </div>
+
+            <!-- 4. Live Traffic Stream -->
+            <div 
+              @click="setView('traffic')"
+              class="nav-pill"
+              :class="activeView === 'traffic' ? 'nav-pill-active' : ''">
+              <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                   :class="activeView === 'traffic' ? 'bg-blue-500 text-white shadow-md' : 'bg-white/5 text-slate-400'">
+                <i class="fa-solid fa-chart-line text-xs"></i>
+              </div>
+              <span>Live Traffic</span>
+            </div>
+
+            <!-- 5. 3D Spatial Radar -->
+            <div 
+              @click="setView('topology')"
+              class="nav-pill"
+              :class="activeView === 'topology' ? 'nav-pill-active' : ''">
+              <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                   :class="activeView === 'topology' ? 'bg-blue-500 text-white shadow-md' : 'bg-white/5 text-slate-400'">
+                <i class="fa-solid fa-circle-nodes text-xs"></i>
+              </div>
+              <span>3D Radar</span>
+            </div>
+          </nav>
+        </div>
+
+        <!-- Sidebar Bottom Controls (Matching Settings & Log Out in reference) -->
+        <div class="space-y-3 pt-6 border-t border-white/10 text-xs">
+          <!-- Audio Synthesizer Toggle -->
+          <div 
+            @click="toggleAudio"
+            class="flex items-center justify-between p-2 rounded-2xl hover:bg-white/5 cursor-pointer text-slate-300 hover:text-white transition-all">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-blue-400">
+                <i :class="audioEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark text-slate-500'"></i>
+              </div>
+              <span class="font-medium text-xs">{{ audioEnabled ? 'Sound Active' : 'Sound Muted' }}</span>
+            </div>
+          </div>
+
+          <!-- Reset Baseline Telemetry -->
+          <div 
+            @click="resetSystem"
+            class="flex items-center justify-between p-2 rounded-2xl hover:bg-rose-500/10 cursor-pointer text-slate-400 hover:text-rose-300 transition-all">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400">
+                <i class="fa-solid fa-rotate-left"></i>
+              </div>
+              <span class="font-medium text-xs">Reset Baseline</span>
+            </div>
+          </div>
+
+          <!-- Quick System Health Ping -->
+          <div class="p-3 rounded-2xl bg-black/40 border border-white/5 text-[11px] text-slate-400 flex items-center justify-between">
+            <span class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              Sentinel Guard
+            </span>
+            <span class="text-emerald-400 font-semibold">Active</span>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- ============================================================= -->
+      <!-- MAIN BODY VIEWPORT (10 COLS)                                  -->
+      <!-- ============================================================= -->
+      <div class="lg:col-span-10 p-6 md:p-8 flex flex-col justify-between space-y-6">
+
+        <!-- TOP BAR: Breadcrumb Navigation & Action Cluster -->
+        <header class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/10">
+          
+          <!-- Breadcrumbs (Exact match to reference: Home / Dashboard / 20 Sep) -->
+          <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">
+            <span class="cursor-pointer hover:text-white" @click="setView('dashboard')">
+              <i class="fa-solid fa-house text-slate-400 mr-1"></i> Home
+            </span>
+            <span class="text-slate-600">/</span>
+            <span class="text-slate-200 font-semibold">{{ activeViewTitle }}</span>
+            <span class="text-slate-600">/</span>
+            <span class="text-blue-400 bg-blue-950/70 px-2.5 py-0.5 rounded-full border border-blue-800/80 flex items-center gap-1.5 font-normal">
+              <i class="fa-regular fa-calendar text-[10px]"></i> 14 Oct Active
+            </span>
+          </div>
+
+          <!-- Top Right Action Cluster (Avatars, Search, Download ZIP, Launch Simulation) -->
+          <div class="flex items-center gap-3">
+            
+            <!-- SecOps Team Member Avatars (Direct match to reference avatar cluster) -->
+            <div class="hidden sm:flex items-center -space-x-2">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-600 border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold text-white shadow" title="Sarah Connor">
+                SC
+              </div>
+              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold text-white shadow" title="John Doe">
+                JD
+              </div>
+              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold text-white shadow" title="Sentinel Bot">
+                <i class="fa-solid fa-robot text-xs"></i>
+              </div>
+              <div class="w-8 h-8 rounded-full bg-white/10 border-2 border-slate-900 flex items-center justify-center text-xs text-blue-300 font-bold hover:bg-white/20 cursor-pointer" title="Add Team Member">
+                +
+              </div>
+            </div>
+
+            <!-- Download Project ZIP Archive Button -->
+            <a 
+              href="/download" 
+              download="api-security-command-center.zip"
+              title="Download Complete Source Code (.zip)"
+              class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-200 hover:text-white transition-all flex items-center gap-2 cursor-pointer shadow-sm">
+              <i class="fa-solid fa-cloud-arrow-down text-blue-400"></i>
+              <span>Download ZIP</span>
+            </a>
+
+            <!-- Primary Glowing Action Button (Like "New task" in reference) -->
+            <button 
+              @click="runSimulation" 
+              :disabled="isSimulating"
+              class="btn-tactile-glow px-6 py-2.5 text-xs font-bold flex items-center gap-2.5 cursor-pointer disabled:opacity-50">
+              <i :class="isSimulating ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-bolt'"></i>
+              <span>{{ isSimulating ? 'Running Attack Suite...' : 'Run Simulation' }}</span>
+            </button>
+
+          </div>
+
+        </header>
+
+        <!-- ============================================================= -->
+        <!-- VIEW 1: BENTO OVERVIEW DASHBOARD                              -->
+        <!-- (Replicating exact layout of Pinterest reference)             -->
+        <!-- ============================================================= -->
+        <div v-show="activeView === 'dashboard'" class="space-y-6 flex-1 view-container">
+          
+          <!-- Headline & Filter Pills Bar (Direct match to "Make Things Simple !" in reference) -->
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight flex items-center gap-3">
+                <span>Make Things Simple !</span>
+              </h1>
+              <p class="text-xs text-slate-300 mt-1.5 font-normal leading-relaxed">
+                Management, route discovery, and abuse prevention in a clean and attractive workspace.
+              </p>
+            </div>
+
+            <!-- Horizontal Filter Pills (Matches "To do v", "Work v", "High priority v" in reference) -->
+            <div class="flex flex-wrap items-center gap-2 text-xs font-medium">
+              
+              <!-- Filter: All APIs -->
+              <button 
+                @click="dashboardFilter = 'all'"
+                class="px-3.5 py-1.5 rounded-full border transition-all cursor-pointer flex items-center gap-2"
+                :class="dashboardFilter === 'all' ? 'bg-white/15 border-white/25 text-white font-semibold shadow-sm' : 'border-white/10 text-slate-400 hover:text-white bg-black/20'">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>To do ({{ inventory.length }})</span>
+                <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+              </button>
+
+              <!-- Filter: Shadow APIs -->
+              <button 
+                @click="dashboardFilter = 'shadow'"
+                class="px-3.5 py-1.5 rounded-full border transition-all cursor-pointer flex items-center gap-2"
+                :class="dashboardFilter === 'shadow' ? 'bg-rose-950/80 border-rose-600 text-rose-300 font-semibold shadow-sm' : 'border-white/10 text-rose-400/90 hover:text-rose-300 bg-black/20'">
+                <span>Unlisted ({{ shadowCount }})</span>
+                <i class="fa-solid fa-chevron-down text-[9px] text-rose-400/60"></i>
+              </button>
+
+              <!-- Filter: High Priority Alerts -->
+              <button 
+                @click="dashboardFilter = 'alerts'"
+                class="px-3.5 py-1.5 rounded-full border transition-all cursor-pointer flex items-center gap-2"
+                :class="dashboardFilter === 'alerts' ? 'bg-amber-950/80 border-amber-600 text-amber-300 font-semibold shadow-sm' : 'border-white/10 text-amber-400/90 hover:text-amber-300 bg-black/20'">
+                <span>High priority</span>
+                <i class="fa-solid fa-chevron-down text-[9px] text-amber-400/60"></i>
+              </button>
+
+              <!-- Filter: Settings / Slider Tool Icon (Directly from reference) -->
+              <button 
+                @click="openReportToast"
+                title="Quick Diagnostics"
+                class="w-8 h-8 rounded-full border border-white/10 bg-black/20 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all cursor-pointer">
+                <i class="fa-solid fa-sliders text-xs"></i>
+              </button>
+
+            </div>
+          </div>
+
+          <!-- MAIN BENTO GRID (8 COLS LEFT, 4 COLS RIGHT) -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- LEFT 8 COLS: Discovered Endpoint Stack Cards -->
+            <div class="lg:col-span-8 space-y-4">
+              
+              <!-- Empty State -->
+              <div v-if="filteredDashboardEndpoints.length === 0" class="bento-card p-12 text-center text-slate-400 text-xs">
+                No endpoints matching the selected filter. Click "Run Simulation" above to inject traffic.
+              </div>
+
+              <!-- ENDPOINT STACK CARDS (Direct visual match to items in Pinterest reference) -->
+              <div 
+                v-for="(ep, idx) in filteredDashboardEndpoints" 
+                :key="ep.id"
+                @click="openInspectModal(ep)"
+                class="p-5 cursor-pointer relative group transition-all"
+                :class="ep.is_shadow && ep.risk_score >= 70 ? 'bento-hero-active' : 'bento-card'">
+                
+                <!-- Card Header Tag (Directly matching "● Today" in reference) -->
+                <div class="flex items-center justify-between pb-3 text-xs">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full" :class="ep.is_shadow ? 'bg-blue-400 shadow-sm shadow-blue-400' : 'bg-slate-400'"></span>
+                    <span class="font-medium text-slate-300">Today</span>
+                  </div>
+
+                  <!-- Quick Icons (Direct match to folder, bell, and three dots in reference) -->
+                  <div class="flex items-center gap-3 text-slate-400 text-xs">
+                    <span v-if="getHumanMeta(ep).files" class="flex items-center gap-1.5 hover:text-white transition-colors">
+                      <i class="fa-regular fa-folder text-[11px]"></i>
+                      <span class="text-[11px]">{{ getHumanMeta(ep).files }}</span>
+                    </span>
+                    <i class="fa-regular fa-bell hover:text-white transition-colors"></i>
+                    <i class="fa-solid fa-ellipsis hover:text-white transition-colors"></i>
+                  </div>
+                </div>
+
+                <div class="flex items-start justify-between gap-4">
+                  
+                  <div class="flex items-start gap-4">
+                    
+                    <!-- App Tile Icon (Like the white geometric logo on blue icon in reference) -->
+                    <div 
+                      class="w-12 h-12 rounded-2xl flex items-center justify-center text-lg shrink-0 border shadow-lg"
+                      :class="ep.is_shadow 
+                        ? (ep.risk_score >= 70 ? 'bg-blue-600 text-white border-blue-400 shadow-blue-500/40' : 'bg-rose-950/90 text-rose-400 border-rose-800') 
+                        : 'bg-slate-900/90 text-blue-400 border-white/10'">
+                      <i :class="ep.is_shadow ? (ep.endpoint.includes('debug') ? 'fa-solid fa-terminal' : 'fa-solid fa-ghost') : 'fa-solid fa-cube'"></i>
+                    </div>
+
+                    <!-- Endpoint Information (Humanized Typography) -->
+                    <div>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <!-- Humanized Title -->
+                        <h3 class="text-base font-bold text-white group-hover:text-blue-300 transition-colors tracking-normal">
+                          {{ getHumanMeta(ep).title }}
+                        </h3>
+
+                        <!-- Subtle Method & Path Badge -->
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-mono bg-white/10 text-slate-300 border border-white/10">
+                          {{ ep.method }} {{ ep.endpoint }}
+                        </span>
+
+                        <!-- Shadow Route Tag -->
+                        <span 
+                          v-if="ep.is_shadow"
+                          class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-rose-500/30 text-rose-200 border border-rose-400/50">
+                          Unlisted
+                        </span>
+                      </div>
+
+                      <!-- Human Description (Direct match to "Description : meeting to review..." in reference) -->
+                      <p class="text-xs text-slate-300 mt-2 leading-relaxed font-normal">
+                        <strong class="text-slate-200 font-semibold">Description :</strong> {{ getHumanMeta(ep).desc }}
+                      </p>
+
+                      <!-- Timestamp Badge (Matching "08:00 Am 10:00 Am" and avatars in reference) -->
+                      <div class="flex flex-wrap items-center gap-3 mt-2.5 text-xs text-slate-400">
+                        <span class="flex items-center gap-1.5 text-blue-300">
+                          <i class="fa-regular fa-clock text-[11px]"></i> {{ getHumanMeta(ep).time }}
+                        </span>
+                        <span>•</span>
+                        <div class="flex items-center gap-1.5">
+                          <div class="flex -space-x-1.5">
+                            <div class="w-4 h-4 rounded-full bg-blue-500 border border-slate-900"></div>
+                            <div class="w-4 h-4 rounded-full bg-indigo-500 border border-slate-900"></div>
+                          </div>
+                          <span class="text-slate-300 text-[11px]">{{ getHumanMeta(ep).analysts }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <!-- Bottom Attributes & Striped Progress Bar (Direct match to reference bottom row) -->
+                <div class="mt-4 pt-3.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
+                  
+                  <!-- Left Tag Pills (Participants like "Design team", "Marketing team" in reference) -->
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-[11px] text-slate-300 font-medium">Participants :</span>
+                    <span 
+                      v-for="(part, pIdx) in getHumanMeta(ep).participants" 
+                      :key="pIdx"
+                      class="px-2.5 py-1 rounded-full bg-white/10 text-[11px] text-slate-200 border border-white/10 hover:bg-white/15 transition-colors">
+                      {{ part }}
+                    </span>
+                  </div>
+
+                  <!-- Right Diagonal Striped Progress Bar with % (Directly from reference "%70") -->
+                  <div class="flex items-center gap-2.5 font-mono">
+                    <span class="text-[11px] text-slate-300 font-medium font-sans">Progress :</span>
+                    <div class="w-28 h-3.5 rounded-full bg-black/60 overflow-hidden p-0.5 border border-white/15 shadow-inner">
+                      <div 
+                        class="h-full rounded-full striped-candy-bar transition-all duration-700"
+                        :class="ep.risk_score >= 80 ? 'bg-rose-500' : (ep.risk_score >= 50 ? 'bg-amber-400' : 'bg-emerald-400')"
+                        :style="{ width: ep.risk_score + '%' }">
+                      </div>
+                    </div>
+                    <span class="text-xs font-bold text-white tracking-tight">
+                      %{{ ep.risk_score }}
+                    </span>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- RIGHT 4 COLS: 3 Bento Widgets (Today Note, My Files, Activity) -->
+            <div class="lg:col-span-4 space-y-4">
+              
+              <!-- Bento Widget 1: Today Note (Direct visual match to "Today note" card in reference) -->
+              <div class="bento-card p-5 relative overflow-hidden bg-gradient-to-br from-blue-900/50 via-slate-900/80 to-slate-950/90 border-blue-500/30">
+                
+                <div class="flex items-center justify-between pb-2 border-b border-white/10">
+                  <span class="text-xs font-bold text-white tracking-wide">
+                    Today note
+                  </span>
+                  <!-- Edit Pencil Icon in Circular Glass Badge (Directly from reference) -->
+                  <div class="w-7 h-7 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer" title="Edit Note">
+                    <i class="fa-solid fa-pen text-[10px]"></i>
+                  </div>
+                </div>
+
+                <!-- Note Body Text with Orange Bullet Dot (Directly from reference) -->
+                <p class="text-xs text-slate-200 mt-3 leading-relaxed font-normal">
+                  Going to the team sync and planning security reviews for the week ahead 🛡️
+                </p>
+
+                <!-- Note Bottom Status & Action Pill (Matching "20min ago" and "I'm going" pill in reference) -->
+                <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-1.5 text-blue-300 text-[11px]">
+                    <i class="fa-regular fa-clock"></i>
+                    <span>20min ago</span>
+                  </div>
+                  
+                  <!-- Interactive Pill Toggle (Matches "✓ I'm going x c" in reference) -->
+                  <button 
+                    @click="activeView = 'alerts'"
+                    class="px-3.5 py-1.5 rounded-full bg-blue-600/80 hover:bg-blue-600 text-white font-medium text-[11px] transition-all flex items-center gap-2 cursor-pointer shadow-md">
+                    <i class="fa-solid fa-check text-[10px]"></i>
+                    <span>In progress</span>
+                  </button>
+                </div>
+
+              </div>
+
+              <!-- Bento Widget 2: My Files (Direct match to "My files" card in reference) -->
+              <div class="bento-card p-5 space-y-3.5">
+                
+                <div class="flex items-center justify-between">
+                  <div class="text-xs font-bold text-white tracking-wide">
+                    My files
+                  </div>
+                  <div class="text-slate-400 text-xs cursor-pointer hover:text-white" title="Options">
+                    <i class="fa-solid fa-ellipsis"></i>
+                  </div>
+                </div>
+
+                <!-- Empty/Placeholder Box (Matching circular disc folder box in reference) -->
+                <div class="p-4 rounded-2xl bg-black/40 border border-white/5 flex flex-col items-center justify-center gap-2 text-center">
+                  <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-400/30 flex items-center justify-center text-blue-400 text-base">
+                    <i class="fa-regular fa-folder-open"></i>
+                  </div>
+                  <div class="text-xs text-slate-300 font-medium">
+                    3 security artifacts ready
+                  </div>
+                </div>
+
+                <!-- Formats List (Matching "More than 20 formats: [Office] [Figma] [Notion]" in reference) -->
+                <div class="space-y-2">
+                  <div class="text-[11px] text-slate-400">
+                    More than 20 formats :
+                  </div>
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5 text-[10px]">
+                      <span class="px-2 py-0.5 rounded-md bg-white/10 text-slate-200 border border-white/5 font-mono">JSON</span>
+                      <span class="px-2 py-0.5 rounded-md bg-white/10 text-slate-200 border border-white/5 font-mono">OpenAPI</span>
+                      <span class="px-2 py-0.5 rounded-md bg-white/10 text-slate-200 border border-white/5 font-mono">SQLite</span>
+                    </div>
+
+                    <!-- Add File / Export Button (Matching "+ Add file" in reference) -->
+                    <a 
+                      href="/download" 
+                      download="api-security-command-center.zip"
+                      class="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-white font-medium text-[11px] transition-all flex items-center gap-1.5 cursor-pointer">
+                      <i class="fa-solid fa-plus text-[9px]"></i>
+                      <span>Add file</span>
+                    </a>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Bento Widget 3: Activity (Direct match to "Activity" card in reference) -->
+              <div class="bento-card p-5 space-y-3">
+                
+                <div class="flex items-center justify-between">
+                  <div>
+                    <span class="text-xs font-bold text-white tracking-wide">
+                      Activity
+                    </span>
+                    <div class="text-[11px] text-slate-400 mt-0.5">
+                      13 Tasks Completed 😄
+                    </div>
+                  </div>
+
+                  <!-- Action Button (Matching "Get the report" glowing pill in reference) -->
+                  <button 
+                    @click="openReportToast"
+                    class="px-3.5 py-1.5 rounded-full bg-blue-600/80 hover:bg-blue-600 text-white font-medium text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md">
+                    <span>Get the report</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                  </button>
+                </div>
+
+                <!-- 3D Speedometer Radar Canvas & Circular Percentage (Matching reference) -->
+                <div class="relative w-full h-[160px] rounded-2xl bg-black/40 border border-white/5 flex items-center justify-center overflow-hidden">
+                  <canvas id="bento-speedometer-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+                  
+                  <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <!-- Circular Percentage Badge (Direct match to "%80" in reference) -->
+                    <div class="w-12 h-12 rounded-full bg-blue-600/40 border border-blue-400/60 flex items-center justify-center font-bold text-sm text-white shadow-lg">
+                      80%
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Timeline Month Axis (Direct match to Jan Feb Mar Apr May Jun in reference) -->
+                <div class="flex items-center justify-between text-[10px] text-slate-400 px-2 pt-1 font-mono">
+                  <span>Jan</span>
+                  <span>Feb</span>
+                  <span>Mar</span>
+                  <span class="text-blue-400 font-bold border-b border-blue-400 pb-0.5">Apr</span>
+                  <span>May</span>
+                  <span>Jun</span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- VIEW 2: FULL API CATALOG VIEW                                 -->
+        <!-- ============================================================= -->
+        <div v-show="activeView === 'catalog'" class="space-y-4 flex-1 view-container">
+          
+          <div class="flex items-center justify-between pb-2 border-b border-white/10">
+            <div>
+              <h2 class="text-2xl font-bold text-white tracking-tight">API Endpoint Inventory</h2>
+              <p class="text-xs text-slate-300 mt-1">Normalized routes cross-referenced with openapi.json catalog.</p>
+            </div>
+            <button 
+              @click="setView('dashboard')"
+              class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-xs text-slate-300 cursor-pointer border border-white/10">
+              &larr; Back to Dashboard
+            </button>
+          </div>
+
+          <div class="bento-card p-5 overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="text-slate-400 border-b border-white/10 uppercase text-[11px] font-semibold">
+                    <th class="py-3 px-3">Method & Route</th>
+                    <th class="py-3 px-3">Spec Status</th>
+                    <th class="py-3 px-3">Auth Type</th>
+                    <th class="py-3 px-3">PII Detected</th>
+                    <th class="py-3 px-3">Calls</th>
+                    <th class="py-3 px-3 text-right">Risk Score</th>
+                    <th class="py-3 px-3 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5 font-mono">
+                  <tr v-for="ep in inventory" :key="ep.id" @click="openInspectModal(ep)" class="hover:bg-white/5 transition-colors cursor-pointer">
+                    <td class="py-3.5 px-3">
+                      <span class="text-blue-400 font-bold mr-1.5">{{ ep.method }}</span>
+                      <span class="text-white font-semibold">{{ ep.endpoint }}</span>
+                    </td>
+                    <td class="py-3.5 px-3">
+                      <span 
+                        class="px-2 py-0.5 rounded text-[10px] font-bold"
+                        :class="ep.is_shadow ? 'bg-rose-950/80 text-rose-300 border border-rose-800' : 'bg-emerald-950/80 text-emerald-300 border border-emerald-800'">
+                        {{ ep.is_shadow ? 'SHADOW' : 'MANAGED' }}
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-3">{{ ep.auth_type }}</td>
+                    <td class="py-3.5 px-3">
+                      <span v-if="ep.contains_pii" class="text-purple-400 font-bold">YES</span>
+                      <span v-else class="text-slate-500">NO</span>
+                    </td>
+                    <td class="py-3.5 px-3 text-slate-400">{{ ep.total_calls }}</td>
+                    <td class="py-3.5 px-3 text-right font-bold text-white">%{{ ep.risk_score }}</td>
+                    <td class="py-3.5 px-3 text-center">
+                      <button class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white text-[11px] font-sans">
+                        Inspect
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- VIEW 3: RUNTIME ABUSE ALERTS VIEW                             -->
+        <!-- ============================================================= -->
+        <div v-show="activeView === 'alerts'" class="space-y-4 flex-1 view-container">
+          
+          <div class="flex items-center justify-between pb-2 border-b border-white/10">
+            <div>
+              <h2 class="text-2xl font-bold text-white tracking-tight">Runtime Abuse Alerts</h2>
+              <p class="text-xs text-slate-300 mt-1">Live heuristic detection of BOLA breaches, token replay, and scraping bursts.</p>
+            </div>
+            <button 
+              @click="setView('dashboard')"
+              class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-xs text-slate-300 cursor-pointer border border-white/10">
+              &larr; Back to Dashboard
+            </button>
+          </div>
+
+          <div v-if="alerts.length === 0" class="bento-card p-12 text-center text-slate-400 text-xs">
+            No abuse incidents currently recorded. Click "Run Simulation" to fire attack vectors.
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div 
+              v-for="alert in alerts" 
+              :key="alert.id"
+              class="bento-card p-5 space-y-2 border-l-4"
+              :class="alert.severity === 'CRITICAL' ? 'border-l-rose-500' : 'border-l-amber-500'">
+              <div class="flex items-center justify-between">
+                <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-white">
+                  {{ alert.abuse_type }}
+                </span>
+                <span class="text-[11px] text-slate-400">{{ formatTime(alert.timestamp) }}</span>
+              </div>
+              <p class="text-xs text-slate-200 leading-relaxed font-normal">{{ alert.details }}</p>
+              <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                <span class="text-blue-400">{{ alert.endpoint }}</span>
+                <span>Caller IP: <strong class="text-white">{{ alert.caller_ip }}</strong></span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- VIEW 4: LIVE TRAFFIC INTERCEPTOR STREAM                       -->
+        <!-- ============================================================= -->
+        <div v-show="activeView === 'traffic'" class="space-y-4 flex-1 view-container">
+          
+          <div class="flex items-center justify-between pb-2 border-b border-white/10">
+            <div>
+              <h2 class="text-2xl font-bold text-white tracking-tight">Passive Traffic Stream</h2>
+              <p class="text-xs text-slate-300 mt-1">Real-time HTTP requests inspected asynchronously via FastAPI interceptor.</p>
+            </div>
+            <button 
+              @click="setView('dashboard')"
+              class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-xs text-slate-300 cursor-pointer border border-white/10">
+              &larr; Back to Dashboard
+            </button>
+          </div>
+
+          <div class="bento-card p-5 overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="text-slate-400 border-b border-white/10 uppercase text-[11px] font-semibold">
+                    <th class="py-3 px-3">Timestamp</th>
+                    <th class="py-3 px-3">Method & Path</th>
+                    <th class="py-3 px-3">Origin IP</th>
+                    <th class="py-3 px-3">Auth Type</th>
+                    <th class="py-3 px-3">Session User</th>
+                    <th class="py-3 px-3">Payload Size</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5 font-mono">
+                  <tr v-for="log in trafficLogs" :key="log.id" class="hover:bg-white/5 transition-colors">
+                    <td class="py-3 px-3 text-slate-400">{{ formatTime(log.timestamp) }}</td>
+                    <td class="py-3 px-3 text-white font-semibold">
+                      <span class="text-blue-400 mr-1.5">{{ log.method }}</span>
+                      {{ log.endpoint }}
+                    </td>
+                    <td class="py-3 px-3 text-slate-300">{{ log.caller_ip }}</td>
+                    <td class="py-3 px-3">{{ log.auth_type }}</td>
+                    <td class="py-3 px-3 text-slate-300">{{ log.user_id || '-' }}</td>
+                    <td class="py-3 px-3 text-slate-400">{{ log.payload_size_bytes }} B</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- VIEW 5: 3D TOPOLOGY RADAR VIEW                                -->
+        <!-- ============================================================= -->
+        <div v-show="activeView === 'topology'" class="space-y-4 flex-1 view-container">
+          
+          <div class="flex items-center justify-between pb-2 border-b border-white/10">
+            <div>
+              <h2 class="text-2xl font-bold text-white tracking-tight">3D Spatial Topology Radar</h2>
+              <p class="text-xs text-slate-300 mt-1">Interactive 3D orbital visualization of endpoints, shadow routes & threat telemetry.</p>
+            </div>
+            <button 
+              @click="setView('dashboard')"
+              class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-xs text-slate-300 cursor-pointer border border-white/10">
+              &larr; Back to Dashboard
+            </button>
+          </div>
+
+          <div class="bento-card p-6 h-[480px] flex items-center justify-center relative overflow-hidden">
+            <canvas id="fullscreen-radar-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+            <div class="absolute bottom-4 left-6 text-xs text-slate-300 bg-black/60 px-4 py-2 rounded-full border border-white/10 shadow-lg">
+              <i class="fa-solid fa-arrows-spin mr-1.5 text-blue-400"></i>
+              Drag to Orbit 360° • Scroll to Zoom • Color: Red = Shadow / Green = Verified
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- ============================================================= -->
+    <!-- MODAL INSPECTOR: EXPLAINABLE RISK SCORING                     -->
+    <!-- ============================================================= -->
+    <div 
+      v-if="selectedEndpoint"
+      class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in"
+      @click.self="closeInspectModal">
+      
+      <div class="bento-card max-w-lg w-full p-6 sm:p-8 border border-white/20 shadow-2xl relative bg-slate-900/90">
+        
+        <button 
+          @click="closeInspectModal"
+          class="absolute top-6 right-6 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="flex items-start gap-4 pb-4 border-b border-white/10">
+          <div 
+            class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0 border"
+            :class="selectedEndpoint.is_shadow ? 'bg-rose-950 text-rose-400 border-rose-800' : 'bg-blue-950 text-blue-400 border-blue-800'">
+            <i :class="selectedEndpoint.is_shadow ? 'fa-solid fa-ghost' : 'fa-solid fa-shield-halved'"></i>
+          </div>
+          <div>
+            <span class="text-[10px] font-semibold uppercase tracking-wider"
+                  :class="selectedEndpoint.is_shadow ? 'text-rose-400' : 'text-blue-400'">
+              {{ selectedEndpoint.is_shadow ? 'Unmanaged Shadow Endpoint' : 'Documented OpenAPI Endpoint' }}
+            </span>
+            <h3 class="text-lg font-bold text-white mt-0.5">
+              {{ getHumanMeta(selectedEndpoint).title }}
+            </h3>
+            <span class="text-xs font-mono text-slate-400">
+              {{ selectedEndpoint.method }} {{ selectedEndpoint.endpoint }}
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2.5 my-4">
+          <div class="p-3 rounded-2xl bg-black/50 border border-white/5 text-center">
+            <div class="text-[10px] uppercase text-slate-400 font-medium">Risk Score</div>
+            <div class="text-2xl font-extrabold mt-0.5 text-blue-400">%{{ selectedEndpoint.risk_score }}</div>
+          </div>
+          <div class="p-3 rounded-2xl bg-black/50 border border-white/5 text-center">
+            <div class="text-[10px] uppercase text-slate-400 font-medium">Severity</div>
+            <div class="text-2xl font-extrabold mt-0.5 text-white">{{ selectedEndpoint.severity }}</div>
+          </div>
+          <div class="p-3 rounded-2xl bg-black/50 border border-white/5 text-center">
+            <div class="text-[10px] uppercase text-slate-400 font-medium">Alerts</div>
+            <div class="text-2xl font-extrabold mt-0.5 text-rose-400">{{ selectedEndpoint.alert_count }}</div>
+          </div>
+        </div>
+
+        <div class="space-y-2.5">
+          <div class="text-xs font-semibold text-slate-300 flex items-center gap-2">
+            <i class="fa-solid fa-calculator text-blue-400"></i>
+            Explainable Risk Scoring Breakdown
+          </div>
+          
+          <div class="space-y-2 bg-black/50 p-4 rounded-2xl border border-white/5 text-xs">
+            <div 
+              v-for="(reason, index) in selectedEndpoint.risk_reasons" 
+              :key="index"
+              class="flex items-start gap-2.5 text-slate-300">
+              <i class="fa-solid fa-arrow-right text-blue-400 mt-0.5 text-[10px]"></i>
+              <span>{{ reason }}</span>
+            </div>
+            <div v-if="!selectedEndpoint.risk_reasons || selectedEndpoint.risk_reasons.length === 0" class="text-emerald-400">
+              ✔ Clean baseline risk assessment.
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-5 pt-3 border-t border-white/10 flex justify-end">
+          <button 
+            @click="closeInspectModal"
+            class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-semibold text-white cursor-pointer">
+            Close Inspector
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div 
+      v-if="toastMessage" 
+      class="fixed bottom-6 right-6 z-50 bg-slate-900/95 border border-blue-500/80 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs animate-in slide-in-from-bottom-5">
+      <i class="fa-solid fa-bell text-blue-400"></i>
+      <span>{{ toastMessage }}</span>
+    </div>
+
+  </div>
+
+  <!-- VUE 3 & THREE.JS INITIALIZATION SCRIPT -->
+  <script>
+    const { createApp, ref, computed, onMounted, onUnmounted, nextTick } = Vue;
+
+    createApp({
+      setup() {
+        const activeView = ref('dashboard');
+        const dashboardFilter = ref('all');
+        const selectedEndpoint = ref(null);
+        const isSimulating = ref(false);
+        const audioEnabled = ref(true);
+        const toastMessage = ref('');
+
+        const kpis = ref({
+          total_apis: 0,
+          shadow_apis: 0,
+          managed_apis: 0,
+          active_alerts: 0,
+          critical_alerts: 0,
+          pii_endpoints: 0,
+          avg_risk_score: 0,
+          total_requests_observed: 0
+        });
+
+        const inventory = ref([]);
+        const alerts = ref([]);
+        const trafficLogs = ref([]);
+
+        let refreshTimer = null;
+        let audioCtx = null;
+
+        const activeViewTitle = computed(() => {
+          switch(activeView.value) {
+            case 'dashboard': return 'Dashboard';
+            case 'catalog': return 'API Catalog';
+            case 'alerts': return 'Abuse Alerts';
+            case 'traffic': return 'Live Traffic';
+            case 'topology': return '3D Radar';
+            default: return 'Overview';
+          }
+        });
+
+        function getHumanMeta(ep) {
+          if (!ep || !ep.endpoint) return { title: 'API Route', desc: '', time: '08:00 Am', participants: ['API Gateway'], files: '1 File', analysts: '+2 People' };
+          
+          if (ep.endpoint.includes('debug')) {
+            return {
+              title: 'System Debug Dump',
+              desc: 'unlisted debug route leaking internal memory, host kernel, and JWT signing keys _',
+              time: '08:00 Am 05:00 Pm',
+              participants: ['Core Backend', 'DevSecOps Team', 'Incident Response'],
+              files: '6 Files',
+              analysts: '+6 People'
+            };
+          } else if (ep.endpoint.includes('admin/export')) {
+            return {
+              title: 'Legacy Data Export',
+              desc: 'deprecated 2023 legacy export route dumping customer emails and social security numbers _',
+              time: '09:30 Am 12:00 Pm',
+              participants: ['Compliance Team', 'Data Privacy'],
+              files: '2 Files',
+              analysts: '+3 People'
+            };
+          } else if (ep.endpoint.includes('balance')) {
+            return {
+              title: 'Account Balance Query',
+              desc: 'banking balance query protected with BOLA resource-owner validation _',
+              time: '08:00 Am 10:00 Am',
+              participants: ['Payments Engine', 'Auth Service'],
+              files: '1 File',
+              analysts: '+4 People'
+            };
+          } else if (ep.endpoint.includes('payments')) {
+            return {
+              title: 'Payment Authorization',
+              desc: 'transaction processing endpoint operating within nominal rate limits _',
+              time: '10:00 Am 04:00 Pm',
+              participants: ['Payments Team', 'Fraud Engine'],
+              files: '4 Files',
+              analysts: '+2 People'
+            };
+          } else {
+            return {
+              title: 'User Profile & Identity',
+              desc: 'user directory profile query with bearer token authentication check _',
+              time: '08:00 Am 11:00 Am',
+              participants: ['Core API', 'Auth Gateway'],
+              files: '3 Files',
+              analysts: '+4 People'
+            };
+          }
+        }
+
+        function playTone(freq, type = 'sine', duration = 0.08) {
+          if (!audioEnabled.value) return;
+          try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+          } catch (e) {
+            // Audio context policy
+          }
+        }
+
+        function toggleAudio() {
+          audioEnabled.value = !audioEnabled.value;
+          showToast(audioEnabled.value ? 'Sound effects on' : 'Sound effects muted');
+          if (audioEnabled.value) playTone(700, 'triangle', 0.1);
+        }
+
+        function showToast(msg) {
+          toastMessage.value = msg;
+          setTimeout(() => {
+            if (toastMessage.value === msg) toastMessage.value = '';
+          }, 3500);
+        }
+
+        function openReportToast() {
+          showToast('📄 Generated Security Telemetry Report');
+          playTone(800, 'sine', 0.1);
+        }
+
+        function formatTime(isoStr) {
+          if (!isoStr) return '';
+          try {
+            const d = new Date(isoStr);
+            return d.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          } catch {
+            return isoStr;
+          }
+        }
+
+        function setView(view) {
+          activeView.value = view;
+          playTone(520, 'sine', 0.05);
+          if (view === 'topology') {
+            nextTick(() => {
+              initFullscreenRadar();
+            });
+          }
+        }
+
+        async function fetchTelemetry() {
+          try {
+            const [kpiRes, invRes, alertsRes, trafficRes] = await Promise.all([
+              fetch('/api/governance/kpis').then(r => r.json()),
+              fetch('/api/governance/inventory').then(r => r.json()),
+              fetch('/api/governance/alerts').then(r => r.json()),
+              fetch('/api/governance/traffic').then(r => r.json())
+            ]);
+
+            kpis.value = kpiRes;
+            inventory.value = invRes;
+            alerts.value = alertsRes;
+            trafficLogs.value = trafficRes;
+          } catch (e) {
+            console.error("Telemetry fetch error:", e);
+          }
+        }
+
+        const filteredDashboardEndpoints = computed(() => {
+          if (dashboardFilter.value === 'shadow') {
+            return inventory.value.filter(e => e.is_shadow);
+          }
+          if (dashboardFilter.value === 'alerts') {
+            return inventory.value.filter(e => e.alert_count > 0 || e.risk_score >= 60);
+          }
+          return inventory.value;
+        });
+
+        const shadowCount = computed(() => {
+          return inventory.value.filter(e => e.is_shadow).length;
+        });
+
+        function openInspectModal(ep) {
+          selectedEndpoint.value = ep;
+          playTone(650, 'sine', 0.06);
+        }
+
+        function closeInspectModal() {
+          selectedEndpoint.value = null;
+          playTone(450, 'sine', 0.05);
+        }
+
+        async function runSimulation() {
+          isSimulating.value = true;
+          playTone(550, 'sawtooth', 0.12);
+          showToast('⚡ Running simulation & attack vectors...');
+          try {
+            await fetch('/api/governance/simulate', { method: 'POST' });
+            await fetchTelemetry();
+            showToast('✔ Attack simulation completed.');
+            playTone(880, 'sine', 0.18);
+          } catch (e) {
+            showToast('❌ Simulation error: ' + e.message);
+          } finally {
+            isSimulating.value = false;
+          }
+        }
+
+        async function resetSystem() {
+          if (!confirm("Reset database, telemetry logs, and sliding windows?")) return;
+          try {
+            await fetch('/api/governance/reset', { method: 'POST' });
+            await fetchTelemetry();
+            showToast('System reset to baseline.');
+            playTone(400, 'triangle', 0.1);
+          } catch (e) {
+            showToast('Reset failed: ' + e.message);
+          }
+        }
+
+        // =================================================================
+        // THREE.JS 360° SPEEDOMETER RADAR (BENTO WIDGET)
+        // =================================================================
+        let bentoScene, bentoCamera, bentoRenderer, bentoGroup;
+
+        function initBentoSpeedometer() {
+          const canvas = document.getElementById('bento-speedometer-canvas');
+          if (!canvas) return;
+
+          const width = canvas.parentElement.clientWidth || 300;
+          const height = canvas.parentElement.clientHeight || 160;
+
+          bentoScene = new THREE.Scene();
+          bentoCamera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
+          bentoCamera.position.set(0, 0, 22);
+
+          bentoRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+          bentoRenderer.setSize(width, height);
+          bentoRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+          bentoGroup = new THREE.Group();
+
+          // 360° Speedometer Outer Ring
+          const ringGeo = new THREE.TorusGeometry(6.8, 0.4, 32, 100);
+          const ringMat = new THREE.MeshStandardMaterial({
+            color: 0x2563eb,
+            emissive: 0x3b82f6,
+            emissiveIntensity: 0.75,
+            roughness: 0.2,
+            metalness: 0.8
+          });
+          const speedometerRing = new THREE.Mesh(ringGeo, ringMat);
+          bentoGroup.add(speedometerRing);
+
+          // Concentric Inner Wireframe
+          const innerGeo = new THREE.TorusGeometry(5.2, 0.08, 16, 60);
+          const innerMat = new THREE.MeshBasicMaterial({ color: 0x60a5fa, wireframe: true, transparent: true, opacity: 0.45 });
+          const innerRing = new THREE.Mesh(innerGeo, innerMat);
+          bentoGroup.add(innerRing);
+
+          // Orbiting Node Beads
+          const nodeGeo = new THREE.SphereGeometry(0.24, 16, 16);
+          const nodeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+          for (let i = 0; i < 12; i++) {
+            const angle = (i / 12) * Math.PI * 2;
+            const nx = Math.cos(angle) * 6.8;
+            const ny = Math.sin(angle) * 6.8;
+            const m = new THREE.Mesh(nodeGeo, nodeMat);
+            m.position.set(nx, ny, 0.2);
+            bentoGroup.add(m);
+          }
+
+          bentoGroup.rotation.x = Math.PI / 4.2;
+          bentoScene.add(bentoGroup);
+
+          const amb = new THREE.AmbientLight(0xffffff, 1.2);
+          bentoScene.add(amb);
+          const light = new THREE.PointLight(0x3b82f6, 3, 50);
+          light.position.set(0, 4, 12);
+          bentoScene.add(light);
+
+          function animate() {
+            requestAnimationFrame(animate);
+            if (bentoGroup) {
+              bentoGroup.rotation.z += 0.005;
+            }
+            bentoRenderer.render(bentoScene, bentoCamera);
+          }
+          animate();
+        }
+
+        // =================================================================
+        // THREE.JS FULLSCREEN TOPOLOGY RADAR
+        // =================================================================
+        let fullScene, fullCamera, fullRenderer, fullGroup;
+        let isDragging = false, prevMousePos = { x: 0, y: 0 };
+
+        function initFullscreenRadar() {
+          const canvas = document.getElementById('fullscreen-radar-canvas');
+          if (!canvas) return;
+
+          const width = canvas.parentElement.clientWidth || 800;
+          const height = canvas.parentElement.clientHeight || 450;
+
+          fullScene = new THREE.Scene();
+          fullCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+          fullCamera.position.set(0, 0, 30);
+
+          fullRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+          fullRenderer.setSize(width, height);
+          fullRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+          fullGroup = new THREE.Group();
+
+          // Central Sentinel Core
+          const coreGeo = new THREE.IcosahedronGeometry(2.5, 2);
+          const coreMat = new THREE.MeshStandardMaterial({
+            color: 0x3b82f6,
+            emissive: 0x1d4ed8,
+            emissiveIntensity: 0.9,
+            roughness: 0.2,
+            metalness: 0.8
+          });
+          const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+          fullGroup.add(coreMesh);
+
+          // Surrounding Orbital Endpoints
+          const count = 7;
+          const lineMat = new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.4 });
+
+          for (let i = 0; i < count; i++) {
+            const angle = (i / count) * Math.PI * 2;
+            const dist = 9 + (i % 3) * 2;
+            const x = Math.cos(angle) * dist;
+            const y = Math.sin(angle) * dist;
+            const z = ((i % 2) === 0 ? 1 : -1) * 2;
+
+            const isShadow = (i >= 5);
+            const nodeCol = isShadow ? 0xf43f5e : 0x10b981;
+
+            const sGeo = new THREE.SphereGeometry(isShadow ? 0.9 : 0.7, 16, 16);
+            const sMat = new THREE.MeshStandardMaterial({
+              color: nodeCol,
+              emissive: nodeCol,
+              emissiveIntensity: 0.6
+            });
+            const sMesh = new THREE.Mesh(sGeo, sMat);
+            sMesh.position.set(x, y, z);
+            fullGroup.add(sMesh);
+
+            // Connector Line to Central Core
+            const points = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(x, y, z)];
+            const lGeo = new THREE.BufferGeometry().setFromPoints(points);
+            const lMesh = new THREE.Line(lGeo, lineMat);
+            fullGroup.add(lMesh);
+          }
+
+          fullScene.add(fullGroup);
+
+          const amb = new THREE.AmbientLight(0xffffff, 1.0);
+          fullScene.add(amb);
+          const pLight = new THREE.PointLight(0x60a5fa, 2, 80);
+          pLight.position.set(0, 10, 15);
+          fullScene.add(pLight);
+
+          // Drag to Orbit Controls
+          canvas.onmousedown = (e) => {
+            isDragging = true;
+            prevMousePos = { x: e.clientX, y: e.clientY };
+          };
+          window.onmouseup = () => { isDragging = false; };
+          window.onmousemove = (e) => {
+            if (!isDragging || !fullGroup) return;
+            const deltaX = e.clientX - prevMousePos.x;
+            const deltaY = e.clientY - prevMousePos.y;
+            fullGroup.rotation.y += deltaX * 0.008;
+            fullGroup.rotation.x += deltaY * 0.008;
+            prevMousePos = { x: e.clientX, y: e.clientY };
+          };
+
+          function animFull() {
+            requestAnimationFrame(animFull);
+            if (fullGroup && !isDragging) {
+              fullGroup.rotation.y += 0.003;
+              fullGroup.rotation.z += 0.001;
+            }
+            if (fullRenderer && fullScene && fullCamera) {
+              fullRenderer.render(fullScene, fullCamera);
+            }
+          }
+          animFull();
+        }
+
+        onMounted(() => {
+          initBentoSpeedometer();
+          fetchTelemetry();
+          refreshTimer = setInterval(fetchTelemetry, 1500);
+        });
+
+        onUnmounted(() => {
+          clearInterval(refreshTimer);
+        });
+
+        return {
+          activeView,
+          activeViewTitle,
+          dashboardFilter,
+          selectedEndpoint,
+          isSimulating,
+          audioEnabled,
+          toastMessage,
+          kpis,
+          inventory,
+          alerts,
+          trafficLogs,
+          filteredDashboardEndpoints,
+          shadowCount,
+          getHumanMeta,
+          setView,
+          openInspectModal,
+          closeInspectModal,
+          openReportToast,
+          runSimulation,
+          resetSystem,
+          toggleAudio,
+          formatTime
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

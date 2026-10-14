@@ -1,0 +1,93 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Corporate Banking & Payments Gateway API",
+    "version": "1.0.0",
+    "description": "Official managed API documentation for Core Banking Services"
+  },
+  "paths": {
+    "/api/v1/users/{id}": {
+      "get": {
+        "summary": "Retrieve user profile and account overview",
+        "operationId": "getUserProfile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile details"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{id}/balance": {
+      "get": {
+        "summary": "Check account ledger balance",
+        "operationId": "checkBalance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account balance data"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/payments": {
+      "post": {
+        "summary": "Process financial wire transfer or payment",
+        "operationId": "processPayment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "recipient_id": { "type": "string" },
+                  "amount": { "type": "number" },
+                  "currency": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payment successfully initiated"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  }
+}
